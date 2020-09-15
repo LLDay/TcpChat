@@ -1,21 +1,14 @@
 #include "server.h"
 
-#include <cerrno>
-#include <cstring>
-#include <iostream>
+#include "chat_errors.h"
 
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
-void errorThrow(std::string_view source) {
-    std::string errorSource{source};
-    throw std::runtime_error{errorSource + ": " + strerror(errno)};
-}
-
-void errorNoThrow(std::string_view source) noexcept {
-    std::cerr << source << ": " << strerror(errno) << std::endl;
-}
+#include <cerrno>
+#include <cstring>
+#include <iostream>
 
 Server::Server() {
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -100,7 +93,7 @@ void Server::flush() noexcept {
 
     for (auto & connection : mConnections)
         for (auto & message : messages)
-            connection.send(message);
+            connection->send(message);
 }
 
 void Server::newConnection(int socket) noexcept {
@@ -110,5 +103,6 @@ void Server::newConnection(int socket) noexcept {
         mDisconnectedNumber -= 1;
 
     if (mDisconnectedNumber == 0)
-        mConnections.emplace_back(std::make_unique<ConnectionManager>(socket, *this));
+        mConnections.emplace_back(
+            std::make_unique<ConnectionManager>(socket, *this));
 }

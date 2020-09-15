@@ -60,8 +60,6 @@ void ConnectionManager::session() noexcept {
         auto queue = std::move(mQueue);
         mQueue = MessagesQueue(queue.size());
 
-        lock.unlock();
-
         for (auto & message : queue) {
             // write
         }
