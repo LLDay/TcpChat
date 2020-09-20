@@ -1,11 +1,15 @@
 #pragma once
 
-#include <string>
 #include <time.h>
+#include <string>
 
 struct Message {
-    time_t time;
-    std::string author;
-    std::string message;
-};
+    using TimeType = int64_t;
 
+    TimeType datetime;
+    std::string text;
+    std::string author;
+
+    std::string serialize() const noexcept;
+    static Message deserialize(const char * data, size_t size) noexcept;
+};
