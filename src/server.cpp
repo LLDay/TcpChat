@@ -1,108 +1,79 @@
 #include "server.h"
 
-#include "chat_errors.h"
+#include "server_log.h"
+#include "io_operations.h"
 
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include <sys/fcntl.h>
 #include <unistd.h>
-
-#include <cerrno>
-#include <cstring>
 #include <iostream>
 
-Server::Server() {
-    mSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (mSocket < 0)
-        errorThrow("Socket");
-
-    sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(SERVER_PORT);
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-
-    if (bind(mSocket, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) < 0)
-        errorThrow("Bind");
-}
+Server::Server(const EndpointSetup & setup) noexcept
+    : mListener{*this, setup.connection},
+      mIncomingEventsListener{*this, setup.eventBufferSize, setup.timeout},
+      mWorkers{setup.parallelWorkers} {}
 
 Server::~Server() noexcept {
     stop();
-    if (mServerThread.joinable())
-        mServerThread.join();
+    join();
+
+    for (auto socket : mSockets)
+        close(socket);
 }
 
-void Server::connectionFreed(ConnectionManager & manager) {
-    std::lock_guard lock{mConnectionsMutex};
-    auto index = &manager - mConnections.front().get();
-    std::swap(mConnections[mDisconnectedNumber++], mConnections[index]);
+void Server::join() noexcept {
+    mListener.join();
+    mIncomingEventsListener.join();
+    mWorkers.join();
 }
 
-void Server::onNewMessage(Message && message) noexcept {
-    std::lock_guard lock{mMessagesMutex};
-    mIncomingMessages.emplace_back(std::move(message));
+void Server::onStart() noexcept {
+    mListener.start();
+    mIncomingEventsListener.start();
+    mWorkers.start();
 }
 
-void Server::join() {
-    if (!mServerThread.joinable())
-        throw std::runtime_error{"Thread is not joinable"};
-    mServerThread.join();
+void Server::onStop() noexcept {
+    mWorkers.stop();
+    mListener.stop();
+    mIncomingEventsListener.stop();
 }
 
-void Server::start() {
-    mServerThread = std::thread{&Server::work, this};
+void Server::onNewConnection(int socket) noexcept {
+    std::lock_guard lock{mMutex};
+    mSockets.push_back(socket);
+
+    auto flags = fcntl(socket, F_GETFL);
+    if (fcntl(socket, F_SETFL, flags | O_NONBLOCK))
+        serverError("fcntl");
+
+    serverInfo("New connection");
+    mIncomingEventsListener.add(socket);
 }
 
-void Server::stop() noexcept {
-    if (shutdown(mSocket, SHUT_RD) < 0)
-        errorNoThrow("Shutdown");
-    mFinish = true;
+void Server::onIncomingMessageFrom(int socket) noexcept {
+    auto readTask = std::make_unique<IoReadTask>(
+        socket, [this, socket](const Message & message) {
+            onMessageReceived(socket, message);
+        });
+    mWorkers.addTask(std::move(readTask));
 }
 
-//
-// [THREAD]
-//
-void Server::work() noexcept {
-    std::cout << "Server started" << std::endl;
+void Server::onConnectionLost(int socket) noexcept {
+    std::lock_guard lock{mMutex};
+    close(socket);
+    auto eraseFrom =
+        std::remove(std::begin(mSockets), std::end(mSockets), socket);
+    mSockets.erase(eraseFrom, std::end(mSockets));
 
-    if (listen(mSocket, BACKLOG) < 0)
-        errorNoThrow("Listen");
-
-    while (!mFinish) {
-        auto socket = accept(mSocket, nullptr, nullptr);
-        if (socket < 0)
-            errorNoThrow("Accept");
-        else
-            newConnection(socket);
-    }
-
-    if (close(mSocket) < 0)
-        errorNoThrow("Close");
-
-    std::cout << "Server stopped" << std::endl;
+    serverInfo("Connection lost");
 }
 
-void Server::flush() noexcept {
-    std::unique_lock lockConnections{mConnectionsMutex, std::defer_lock};
-    std::unique_lock lockMessages{mMessagesMutex, std::defer_lock};
-    std::lock(lockConnections, lockMessages);
+void Server::onMessageReceived(int socket, const Message & message) noexcept {
+    mIncomingEventsListener.oneshot(socket);
 
-    auto messages = std::move(mIncomingMessages);
-    mIncomingMessages = MessagesQueue(messages.size());
-    lockMessages.unlock();
+    std::lock_guard lock{mMutex};
+    auto broadcastTask = std::make_unique<IoBroadcastTask>(mSockets, message);
 
-    for (auto & connection : mConnections)
-        for (auto & message : messages)
-            connection->send(message);
-}
-
-void Server::newConnection(int socket) noexcept {
-    std::lock_guard lock{mConnectionsMutex};
-    while (mDisconnectedNumber > 0 &&
-           mConnections[mDisconnectedNumber - 1]->tryToConnect(socket))
-        mDisconnectedNumber -= 1;
-
-    if (mDisconnectedNumber == 0)
-        mConnections.emplace_back(
-            std::make_unique<ConnectionManager>(socket, *this));
+    for (auto & subtask : broadcastTask->split(mWorkers.size()))
+        mWorkers.addTask(std::move(subtask));
 }

@@ -1,16 +1,21 @@
 find_package(Threads)
 
 add_library(
-  chatlibs SHARED
-  ${CMAKE_SOURCE_DIR}/src/chat_errors.cpp
-  ${CMAKE_SOURCE_DIR}/src/connection.cpp
-  ${CMAKE_SOURCE_DIR}/src/interuptable.cpp
-  ${CMAKE_SOURCE_DIR}/src/messages_buffer.cpp
-  ${CMAKE_SOURCE_DIR}/src/server_connection.cpp
-  ${CMAKE_SOURCE_DIR}/src/server.cpp)
+    chatlibs STATIC
+    ${CMAKE_SOURCE_DIR}/src/incoming_events_listener.cpp
+    ${CMAKE_SOURCE_DIR}/src/io_operations.cpp
+    ${CMAKE_SOURCE_DIR}/src/looped_thread.cpp
+    ${CMAKE_SOURCE_DIR}/src/manual_control.cpp
+    ${CMAKE_SOURCE_DIR}/src/message.cpp
+    ${CMAKE_SOURCE_DIR}/src/server_log.cpp
+    ${CMAKE_SOURCE_DIR}/src/worker.cpp
+    ${CMAKE_SOURCE_DIR}/src/workers_pool.cpp)
 
-target_link_libraries(chatlibs ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(chatlibs PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(server ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_executable(server
+    ${CMAKE_SOURCE_DIR}/src/connection_listener.cpp
+    ${CMAKE_SOURCE_DIR}/src/server.cpp
+    ${CMAKE_SOURCE_DIR}/src/server_main.cpp)
 
-target_link_libraries(server chatlibs)
+target_link_libraries(server PRIVATE chatlibs)

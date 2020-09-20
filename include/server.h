@@ -1,60 +1,44 @@
 #pragma once
 
-#include "connection.h"
+#include "connection_listener.h"
+#include "incoming_events_listener.h"
+#include "manual_control.h"
 #include "message.h"
+#include "workers_pool.h"
 
-#include <memory.h>
-#include <atomic>
 #include <mutex>
-#include <thread>
-#include <vector>
 
-class Server {
+class Server : public IConnectionHandler,
+               public IncomingEventHandler,
+               public ManualControl {
 public:
-    // Use unique_ptr to move items within a vector for optimisation
-    using ConnectionsPool = std::vector<std::unique_ptr<ConnectionManager>>;
-    using MessagesQueue = ConnectionManager::MessagesQueue;
+    using SocketList = std::vector<int>;
 
 public:
-    static constexpr size_t SERVER_PORT = 30852;
-    static constexpr size_t BACKLOG = 32;
-
-public:
-    Server();
-
-    Server(Server &) = delete;
-
-    Server & operator=(Server &) = delete;
+    Server(const EndpointSetup & setup) noexcept;
 
     ~Server() noexcept;
 
-    void connectionFreed(ConnectionManager & manager);
-
-    void onNewMessage(Message && message) noexcept;
-
-    void join();
-
-    void start();
-
-    void stop() noexcept;
+    void join() noexcept;
 
 private:
-    void work() noexcept;
+    void onStart() noexcept override;
 
-    void flush() noexcept;
+    void onStop() noexcept override;
 
-    void newConnection(int socket) noexcept;
+    void onNewConnection(int socket) noexcept override;
+
+    void onIncomingMessageFrom(int socket) noexcept override;
+
+    void onConnectionLost(int socket) noexcept override;
+
+    void onMessageReceived(int socket, const Message & message) noexcept;
 
 private:
-    int mSocket;
+    std::mutex mMutex;
+    SocketList mSockets;
 
-    std::atomic_bool mFinish = false;
-    std::thread mServerThread;
-
-    std::mutex mMessagesMutex;
-    MessagesQueue mIncomingMessages;
-
-    size_t mDisconnectedNumber;
-    std::mutex mConnectionsMutex;
-    ConnectionsPool mConnections;
+    ConnectionListener mListener;
+    IncomingEventsListener mIncomingEventsListener;
+    WorkersPool mWorkers;
 };
