@@ -2,13 +2,15 @@
 
 #include "client/client.h"
 
-#include <QDebug>
-
 EventListenerAdapter::EventListenerAdapter(
     int eventBufferSize,
     int timeout) noexcept
     : mListener{*this, eventBufferSize, timeout} {
     mListener.start();
+}
+
+EventListenerAdapter::~EventListenerAdapter() noexcept {
+    mListener.join();
 }
 
 void EventListenerAdapter::add(int socket) noexcept {
