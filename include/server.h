@@ -8,6 +8,8 @@
 
 #include <mutex>
 
+struct EndpointSetup;
+
 class Server : public IConnectionHandler,
                public IncomingEventHandler,
                public ManualControl {

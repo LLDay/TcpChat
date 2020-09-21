@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-class ConnectionSetup;
+struct ConnectionSetup;
 
 void logError(std::string_view source) noexcept;
 

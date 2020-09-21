@@ -3,12 +3,12 @@
 
 #include "connection_listener.h"
 #include "runnable.h"
+#include "utils.h"
 #include "workers_pool.h"
 
 #include <gtest/gtest.h>
 #include <unistd.h>
 #include <mutex>
-#include <fcntl.h>
 
 Message getMessage() {
     Message message;
@@ -16,11 +16,6 @@ Message getMessage() {
     message.text = "Text\nWith new line";
     message.datetime = time(nullptr);
     return message;
-}
-
-void makeNonblock(int fd) {
-    auto flags = fcntl(fd, F_GETFL);
-    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
 TEST(Server, Message) {
@@ -89,7 +84,7 @@ TEST(Server, ReadTask) {
     int pipes[2];
     ASSERT_EQ(pipe(pipes), 0);
 
-    makeNonblock(pipes[0]);
+    makeNonBlocking(pipes[0]);
 
     auto message = getMessage();
     auto serialized = message.serialize();
@@ -118,7 +113,7 @@ TEST(Server, BroadcastTask) {
     int pipes[2];
     for (auto i = 0; i < messagesNumber; ++i) {
         ASSERT_EQ(pipe(pipes), 0);
-        makeNonblock(pipes[0]);
+        makeNonBlocking(pipes[0]);
         fdRead.push_back(pipes[0]);
         fdWrite.push_back(pipes[1]);
     }

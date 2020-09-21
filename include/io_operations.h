@@ -2,8 +2,8 @@
 
 #include "message.h"
 #include "runnable.h"
-#include "workers_pool.h"
 
+#include <vector>
 #include <functional>
 #include <memory>
 
@@ -24,6 +24,17 @@ public:
 private:
     int mSocket;
     CallbackType mCallback;
+};
+
+class IoWriteTask : public IRunnable {
+public:
+    explicit IoWriteTask(int socket, const Message & message) noexcept;
+
+    void run() noexcept override;
+
+private:
+    int mSocket;
+    Message mMessage;
 };
 
 class IoBroadcastTask : public IRunnable {

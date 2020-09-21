@@ -1,6 +1,7 @@
 #include "connection_listener.h"
 
-#include "server_log.h"
+#include "setup.h"
+#include "utils.h"
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -8,42 +9,22 @@
 #include <unistd.h>
 
 #include <cstring>
-#include <iostream>
 
 ConnectionListener::ConnectionListener(
     IConnectionHandler & handler,
     const ConnectionSetup & setup) noexcept
-    : mHandler{handler}, mSetup{setup}, mSocket{-1} {}
+    : mHandler{handler} {
+    mSocket = bindedSocket(setup);
+}
 
 void ConnectionListener::onStop() noexcept {
     if (shutdown(mSocket, SHUT_RD))
-        serverError("shutdown");
+        logError("shutdown");
 }
 
 void ConnectionListener::onThreadStart() noexcept {
-    mSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (mSocket < 0) {
-        serverError("Socket");
-        stop();
-        return;
-    }
-
-    sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(mSetup.port);
-
-    if (inet_pton(AF_INET, mSetup.address.c_str(), &addr.sin_addr) <= 0)
-        serverError("inet_pton");
-
-    if (bind(mSocket, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) < 0) {
-        serverError("bind");
-        stop();
-    }
-
     if (listen(mSocket, BACKLOG) < 0) {
-        serverError("listen");
+        logError("listen");
         stop();
     }
 }
@@ -54,12 +35,12 @@ void ConnectionListener::threadStep() noexcept {
         return;
 
     if (socket < 0) {
-        serverError("Accept");
+        logError("Accept");
     }
     mHandler.onNewConnection(socket);
 }
 
 void ConnectionListener::onThreadFinish() noexcept {
     if (close(mSocket) < 0)
-        serverError("Close");
+        logError("Close");
 }

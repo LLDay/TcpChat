@@ -1,7 +1,8 @@
 #pragma once
 
 #include "looped_thread.h"
-#include "setup.h"
+
+struct ConnectionSetup;
 
 class IConnectionHandler {
 public:
@@ -31,6 +32,5 @@ private:
 
 private:
     IConnectionHandler & mHandler;
-    ConnectionSetup mSetup;
     int mSocket;
 };

@@ -1,13 +1,10 @@
 #include "io_operations.h"
 
-#include "server_log.h"
+#include "utils.h"
 
-#include <fcntl.h>
-#include <time.h>
 #include <unistd.h>
+
 #include <algorithm>
-#include <chrono>
-#include <iostream>
 #include <memory>
 
 IoReadTask::IoReadTask(int socket, CallbackType callback) noexcept
@@ -20,7 +17,7 @@ void IoReadTask::run() noexcept {
     auto bytes = read(mSocket, buffer.begin(), buffer.size());
 
     if (bytes < 0) {
-        serverError("read");
+        logError("read");
         return;
     }
 
@@ -32,7 +29,7 @@ void IoReadTask::run() noexcept {
         bytes = read(mSocket, buffer.begin(), buffer.size());
     } while (bytes > 0);
 
-    serverInfo("Received " + std::to_string(rawMessage.size()) + " bytes");
+    logInfo("Received " + std::to_string(rawMessage.size()) + " bytes");
 
     if (mCallback) {
         auto readMessage =
@@ -40,6 +37,15 @@ void IoReadTask::run() noexcept {
         readMessage.datetime = time(nullptr);
         mCallback(readMessage);
     }
+}
+
+IoWriteTask::IoWriteTask(int socket, const Message & message) noexcept
+    : mSocket{socket}, mMessage{message} {}
+
+void IoWriteTask::run() noexcept {
+    auto serialized = mMessage.serialize();
+    if (write(mSocket, serialized.data(), serialized.size()) < 0)
+        logError("write");
 }
 
 IoBroadcastTask::IoBroadcastTask(
@@ -53,7 +59,7 @@ void IoBroadcastTask::run() noexcept {
 
     for (int i = mFrom; i < mTo; ++i) {
         if (write((*mSockets)[i], serialized.data(), serialized.size()) < 0)
-            serverError("write");
+            logError("write");
     }
 }
 

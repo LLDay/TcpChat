@@ -1,6 +1,7 @@
 #include "server.h"
 
-#include "server_log.h"
+#include "utils.h"
+#include "setup.h"
 #include "io_operations.h"
 
 #include <sys/fcntl.h>
@@ -40,14 +41,11 @@ void Server::onStop() noexcept {
 
 void Server::onNewConnection(int socket) noexcept {
     std::lock_guard lock{mMutex};
+    makeNonBlocking(socket);
     mSockets.push_back(socket);
 
-    auto flags = fcntl(socket, F_GETFL);
-    if (fcntl(socket, F_SETFL, flags | O_NONBLOCK))
-        serverError("fcntl");
-
-    serverInfo("New connection");
     mIncomingEventsListener.add(socket);
+    logInfo("New connection");
 }
 
 void Server::onIncomingMessageFrom(int socket) noexcept {
@@ -65,7 +63,7 @@ void Server::onConnectionLost(int socket) noexcept {
         std::remove(std::begin(mSockets), std::end(mSockets), socket);
     mSockets.erase(eraseFrom, std::end(mSockets));
 
-    serverInfo("Connection lost");
+    logInfo("Connection lost");
 }
 
 void Server::onMessageReceived(int socket, const Message & message) noexcept {

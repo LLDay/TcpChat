@@ -1,6 +1,7 @@
 #include "server.h"
 
 #include "runnable.h"
+#include "setup.h"
 
 #include <signal.h>
 #include <time.h>
