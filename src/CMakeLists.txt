@@ -1,13 +1,13 @@
 find_package(Threads)
 
 add_library(
-    chatlibs STATIC
+    chatlibs SHARED
     ${CMAKE_SOURCE_DIR}/src/incoming_events_listener.cpp
     ${CMAKE_SOURCE_DIR}/src/io_operations.cpp
     ${CMAKE_SOURCE_DIR}/src/looped_thread.cpp
     ${CMAKE_SOURCE_DIR}/src/manual_control.cpp
     ${CMAKE_SOURCE_DIR}/src/message.cpp
-    ${CMAKE_SOURCE_DIR}/src/server_log.cpp
+    ${CMAKE_SOURCE_DIR}/src/utils.cpp
     ${CMAKE_SOURCE_DIR}/src/worker.cpp
     ${CMAKE_SOURCE_DIR}/src/workers_pool.cpp)
 

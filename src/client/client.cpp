@@ -1,5 +1,7 @@
 #include "client/client.h"
+#include <arpa/inet.h>
 #include <unistd.h>
+#include "utils.h"
 #include "ui_client.h"
 
 #include "client/dialog_name.h"
@@ -11,47 +13,36 @@
 #include <QThread>
 #include <algorithm>
 
+#include <sys/socket.h>
+
 Client::Client(
     QStringView name,
     const ConnectionSetup & setup,
     QWidget * parent) noexcept
-    : QMainWindow{parent}, mName{name.toString()}, ui{new Ui::Client} {
+    : QMainWindow{parent}, mName{name.toString()}, mListener{1, 200},
+      ui{new Ui::Client} {
     ui->setupUi(this);
 
     QObject::connect(
         ui->sendButton, &QPushButton::clicked, this, &Client::onSendClicked);
 
     QObject::connect(
-        &mSocket, &QTcpSocket::readyRead, this, &Client::onIncomingMessage);
+        &mListener, &EventListenerAdapter::incomingMessage, this,
+        &Client::onIncomingMessage);
+
+    QObject::connect(
+        &mListener, &EventListenerAdapter::connectionLost, this,
+        &Client::onConnectionLost);
 
     ui->messageTextEdit->setFocus();
 
-    mSocket.connectToHost(
-        QString::fromStdString(setup.address), setup.port,
-        QAbstractSocket::ReadWrite,
-        QAbstractSocket::NetworkLayerProtocol::IPv4Protocol);
+    mSocket = connectedSocket(setup);
+    makeNonBlocking(mSocket);
+    mListener.add(mSocket);
 }
 
 Client::~Client() noexcept {
     delete ui;
-}
-
-void Client::onIncomingMessage() noexcept {
-    QByteArray array;
-
-    while (mSocket.bytesAvailable())
-        array += mSocket.readLine();
-
-    qDebug() << "Received " << array.size() << " bytes";
-
-    auto message = Message::deserialize(array.data(), array.size());
-    auto item = new QListWidgetItem{ui->messagesListWidget};
-    auto messageWidget = new MessageWidget{message, this};
-
-    item->setSizeHint(messageWidget->sizeHint());
-    ui->messagesListWidget->addItem(item);
-    ui->messagesListWidget->setItemWidget(item, messageWidget);
-    ui->messageTextEdit->clear();
 }
 
 void Client::onSendClicked() noexcept {
@@ -65,5 +56,27 @@ void Client::onSendClicked() noexcept {
     message.text = std::move(text);
 
     auto rawMessage = message.serialize();
-    mSocket.write(rawMessage.data(), rawMessage.size());
+
+    if (write(mSocket, rawMessage.data(), rawMessage.size()) < 0)
+        logError("write");
 }
+
+void Client::onIncomingMessage() noexcept {
+    auto callback = [this](const Message & message) {
+        qDebug() << "Received " << message.text.size() << " bytes";
+
+        auto item = new QListWidgetItem{ui->messagesListWidget};
+        auto messageWidget = new MessageWidget{message, ui->messagesListWidget};
+
+        item->setSizeHint(messageWidget->sizeHint());
+        ui->messagesListWidget->addItem(item);
+        ui->messagesListWidget->setItemWidget(item, messageWidget);
+        ui->messageTextEdit->clear();
+    };
+
+    IoReadTask read{mSocket, callback};
+    read.run();
+    mListener.oneshot(mSocket);
+}
+
+void Client::onConnectionLost() noexcept {}

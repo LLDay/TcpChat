@@ -1,11 +1,8 @@
 #pragma once
 
-#include "incoming_events_listener.h"
-#include "manual_control.h"
-#include "workers_pool.h"
+#include "event_listener_adapter.h"
 
 #include <QMainWindow>
-#include <QTcpSocket>
 #include <QString>
 
 struct ConnectionSetup;
@@ -28,10 +25,13 @@ public:
 public slots:
     void onIncomingMessage() noexcept;
 
+    void onConnectionLost() noexcept;
+
     void onSendClicked() noexcept;
 
 private:
-    QTcpSocket mSocket;
+    qint32 mSocket;
     QString mName;
+    EventListenerAdapter mListener;
     Ui::Client * ui;
 };

@@ -12,12 +12,14 @@ qt_wrap_ui(client_ui
 qt_wrap_cpp(client_moc
     ${CMAKE_SOURCE_DIR}/include/client/client.h
     ${CMAKE_SOURCE_DIR}/include/client/dialog_name.h
+    ${CMAKE_SOURCE_DIR}/include/client/event_listener_adapter.h
     ${CMAKE_SOURCE_DIR}/include/client/message_widget.h)
 
 add_executable(client ${client_moc} ${client_ui}
     ${CMAKE_SOURCE_DIR}/src/client/client_main.cpp
     ${CMAKE_SOURCE_DIR}/src/client/client.cpp
     ${CMAKE_SOURCE_DIR}/src/client/dialog_name.cpp
+    ${CMAKE_SOURCE_DIR}/src/client/event_listener_adapter.cpp
     ${CMAKE_SOURCE_DIR}/src/client/message_widget.cpp)
 
 target_link_libraries(client PRIVATE
