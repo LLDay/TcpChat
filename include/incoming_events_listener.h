@@ -18,15 +18,16 @@ public:
 
 class IncomingEventsListener : public LoopedThread {
 public:
-    IncomingEventsListener(IncomingEventHandler & handler, int eventBufferSize, int timeout);
+    IncomingEventsListener(
+        IncomingEventHandler & handler,
+        int eventBufferSize,
+        int timeout);
 
     void add(int socket) noexcept;
 
     void oneshot(int socket) noexcept;
 
 private:
-    void onThreadStart() noexcept override;
-
     void threadStep() noexcept override;
 
     void onThreadFinish() noexcept override;

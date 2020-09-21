@@ -1,6 +1,6 @@
 #include "incoming_events_listener.h"
 
-#include "server_log.h"
+#include "utils.h"
 
 #include <unistd.h>
 #include <algorithm>
@@ -14,34 +14,31 @@ IncomingEventsListener::IncomingEventsListener(
     : mHandler{handler}, mTimeout{timeout}, mBufferSize{eventBufferSize} {
     if (mBufferSize < 0)
         throw std::invalid_argument{"No buffer memory"};
+
+    mEventBuffer = std::make_unique<epoll_event[]>(mBufferSize);
+    mEpoll = epoll_create(mBufferSize);
+    if (mEpoll < 0) {
+        logError("epoll_create");
+        stop();
+    }
 }
 
 void IncomingEventsListener::add(int socket) noexcept {
     auto event = epoll_event{};
     event.data.fd = socket;
-    event.events = EPOLLIN | EPOLLET | EPOLLONESHOT | EPOLLRDHUP | EPOLLERR;
+    event.events = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP | EPOLLERR;
 
     if (epoll_ctl(mEpoll, EPOLL_CTL_ADD, socket, &event) < 0)
-        serverError("epoll_ctl_add");
+        logError("epoll_ctl_add");
 }
 
 void IncomingEventsListener::oneshot(int socket) noexcept {
     auto event = epoll_event{};
     event.data.fd = socket;
-    event.events = EPOLLIN | EPOLLET | EPOLLONESHOT | EPOLLRDHUP | EPOLLERR;
+    event.events = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP | EPOLLERR;
 
     if (epoll_ctl(mEpoll, EPOLL_CTL_MOD, socket, &event) < 0)
-        serverError("epoll_ctl_add");
-}
-
-void IncomingEventsListener::onThreadStart() noexcept {
-    mEventBuffer = std::make_unique<epoll_event[]>(mBufferSize);
-
-    mEpoll = epoll_create(mBufferSize);
-    if (mEpoll < 0) {
-        serverError("epoll_create");
-        stop();
-    }
+        logError("epoll_ctl_add");
 }
 
 void IncomingEventsListener::threadStep() noexcept {
@@ -61,5 +58,5 @@ void IncomingEventsListener::threadStep() noexcept {
 
 void IncomingEventsListener::onThreadFinish() noexcept {
     if (close(mEpoll) < 0)
-        serverError("close");
+        logError("close");
 }
