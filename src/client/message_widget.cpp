@@ -5,7 +5,6 @@
 
 #include <QDateTime>
 #include <QString>
-#include <QDebug>
 
 MessageWidget::MessageWidget(const Message & message, QWidget * parent)
     : QWidget{parent}, ui{new Ui::MessageWidget} {

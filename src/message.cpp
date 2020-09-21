@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstring>
-#include <iostream>
 
 std::string Message::serialize() const noexcept {
     constexpr auto timeSize = sizeof(TimeType);
@@ -12,11 +11,10 @@ std::string Message::serialize() const noexcept {
         portableTime[i] = (datetime >> (8 * i)) & 0xFF;
 
     std::string serialized;
-    serialized.reserve(timeSize + author.size() + text.size() + 3);
+    serialized.reserve(timeSize + author.size() + text.size() + 2);
     serialized.append(portableTime, timeSize);
-    serialized.append("#");
     serialized.append(author);
-    serialized.append("#");
+    serialized.append("\n");
     serialized.append(text);
     serialized.append("\0");
 
@@ -29,8 +27,8 @@ Message Message::deserialize(const char * data, size_t size) noexcept {
     Message deserialized;
 
     auto dataEnd = data + size;
-    auto authorStart = data + timeSize + 1;
-    auto authorEnd = std::find(authorStart, dataEnd, '#');
+    auto authorStart = data + timeSize;
+    auto authorEnd = std::find(authorStart, dataEnd, '\n');
 
     memcpy(&deserialized.datetime, data, timeSize);
     std::copy(authorStart, authorEnd, std::back_inserter(deserialized.author));

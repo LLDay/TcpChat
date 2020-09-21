@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <QString>
 
-struct ConnectionSetup;
+struct EndpointSetup;
 struct Message;
 
 namespace Ui {
@@ -17,7 +17,7 @@ class Client : public QMainWindow {
 public:
     explicit Client(
         QStringView name,
-        const ConnectionSetup & setup,
+        const EndpointSetup & setup,
         QWidget * parent = nullptr) noexcept;
 
     ~Client() noexcept;

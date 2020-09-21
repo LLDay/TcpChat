@@ -1,7 +1,6 @@
 #include "workers_pool.h"
 
 #include <stdexcept>
-#include <iostream>
 
 WorkersPool::WorkersPool(int size) {
     if (size <= 0)

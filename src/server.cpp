@@ -1,12 +1,10 @@
 #include "server.h"
 
-#include "utils.h"
-#include "setup.h"
 #include "io_operations.h"
+#include "setup.h"
+#include "utils.h"
 
-#include <sys/fcntl.h>
 #include <unistd.h>
-#include <iostream>
 
 Server::Server(const EndpointSetup & setup) noexcept
     : mListener{*this, setup.connection},

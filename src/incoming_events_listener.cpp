@@ -3,8 +3,6 @@
 #include "utils.h"
 
 #include <unistd.h>
-#include <algorithm>
-#include <iostream>
 #include <stdexcept>
 
 IncomingEventsListener::IncomingEventsListener(
@@ -17,6 +15,7 @@ IncomingEventsListener::IncomingEventsListener(
 
     mEventBuffer = std::make_unique<epoll_event[]>(mBufferSize);
     mEpoll = epoll_create(mBufferSize);
+
     if (mEpoll < 0) {
         logError("epoll_create");
         stop();
@@ -38,7 +37,7 @@ void IncomingEventsListener::oneshot(int socket) noexcept {
     event.events = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP | EPOLLERR;
 
     if (epoll_ctl(mEpoll, EPOLL_CTL_MOD, socket, &event) < 0)
-        logError("epoll_ctl_add");
+        logError("epoll_ctl_mod");
 }
 
 void IncomingEventsListener::threadStep() noexcept {

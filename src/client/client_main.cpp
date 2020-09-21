@@ -4,7 +4,6 @@
 #include "client/dialog_name.h"
 
 #include <QApplication>
-#include <QString>
 
 int main(int argc, char * argv[]) {
     QApplication a{argc, argv};
@@ -19,9 +18,11 @@ int main(int argc, char * argv[]) {
     if (name.isEmpty())
         return 0;
 
-    ConnectionSetup setup;
-    setup.address = "127.0.0.1";
-    setup.port = 50000;
+    EndpointSetup setup;
+    setup.connection.address = "127.0.0.1";
+    setup.connection.port = 50000;
+    setup.eventBufferSize = 2;
+    setup.timeout = 100;
 
     Client w{name, setup};
     w.show();

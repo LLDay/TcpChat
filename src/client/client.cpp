@@ -1,26 +1,23 @@
 #include "client/client.h"
-#include <arpa/inet.h>
-#include <unistd.h>
-#include "utils.h"
-#include "ui_client.h"
 
 #include "client/dialog_name.h"
 #include "client/message_widget.h"
+
 #include "io_operations.h"
 #include "setup.h"
+#include "ui_client.h"
+#include "utils.h"
+
+#include <unistd.h>
 
 #include <QDebug>
-#include <QThread>
-#include <algorithm>
-
-#include <sys/socket.h>
 
 Client::Client(
     QStringView name,
-    const ConnectionSetup & setup,
+    const EndpointSetup & setup,
     QWidget * parent) noexcept
-    : QMainWindow{parent}, mName{name.toString()}, mListener{1, 200},
-      ui{new Ui::Client} {
+    : QMainWindow{parent}, mName{name.toString()},
+      mListener{setup.eventBufferSize, setup.timeout}, ui{new Ui::Client} {
     ui->setupUi(this);
 
     QObject::connect(
@@ -36,8 +33,9 @@ Client::Client(
 
     ui->messageTextEdit->setFocus();
 
-    mSocket = connectedSocket(setup);
+    mSocket = connectedSocket(setup.connection);
     makeNonBlocking(mSocket);
+
     mListener.add(mSocket);
 }
 
@@ -55,10 +53,8 @@ void Client::onSendClicked() noexcept {
     message.author = mName.toStdString();
     message.text = std::move(text);
 
-    auto rawMessage = message.serialize();
-
-    if (write(mSocket, rawMessage.data(), rawMessage.size()) < 0)
-        logError("write");
+    IoWriteTask writeTask{mSocket, message};
+    writeTask.run();
 }
 
 void Client::onIncomingMessage() noexcept {

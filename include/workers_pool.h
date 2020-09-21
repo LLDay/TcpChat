@@ -8,7 +8,6 @@
 #include <deque>
 #include <memory>
 #include <mutex>
-#include <thread>
 #include <vector>
 
 class WorkersPoolAccessor {

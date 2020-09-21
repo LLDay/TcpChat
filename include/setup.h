@@ -2,7 +2,6 @@
 
 #include <netinet/in.h>
 #include <string>
-#include <thread>
 
 struct ConnectionSetup {
     in_port_t port;

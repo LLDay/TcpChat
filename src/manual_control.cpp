@@ -1,8 +1,6 @@
 #include "manual_control.h"
 
-ManualControl::~ManualControl() noexcept {
-    stop();
-}
+ManualControl::ManualControl() noexcept : mWorking{false} {}
 
 void ManualControl::start() noexcept {
     if (!mWorking.exchange(true))

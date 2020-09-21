@@ -4,7 +4,9 @@
 
 class ManualControl {
 public:
-    virtual ~ManualControl() noexcept;
+    ManualControl() noexcept;
+
+    virtual ~ManualControl() noexcept = default;
 
     void start() noexcept;
 
@@ -20,5 +22,5 @@ protected:
     virtual void onStop() noexcept;
 
 private:
-    std::atomic_bool mWorking = false;
+    std::atomic_bool mWorking;
 };

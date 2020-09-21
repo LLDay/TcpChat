@@ -1,7 +1,6 @@
+#include "connection_listener.h"
 #include "io_operations.h"
 #include "message.h"
-
-#include "connection_listener.h"
 #include "runnable.h"
 #include "utils.h"
 #include "workers_pool.h"

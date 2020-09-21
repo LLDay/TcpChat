@@ -2,8 +2,6 @@
 
 #include "workers_pool.h"
 
-#include <iostream>
-
 Worker::Worker(WorkersPoolAccessor & pool) noexcept : mPool{pool} {}
 
 void Worker::threadStep() noexcept {

@@ -17,7 +17,7 @@ public:
     using SocketList = std::vector<int>;
 
 public:
-    Server(const EndpointSetup & setup) noexcept;
+    explicit Server(const EndpointSetup & setup) noexcept;
 
     ~Server() noexcept;
 

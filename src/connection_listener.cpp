@@ -3,12 +3,7 @@
 #include "setup.h"
 #include "utils.h"
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include <unistd.h>
-
-#include <cstring>
 
 ConnectionListener::ConnectionListener(
     IConnectionHandler & handler,

@@ -1,4 +1,4 @@
-#include <looped_thread.h>
+#include "looped_thread.h"
 
 LoopedThread::~LoopedThread() noexcept {
     stop();
