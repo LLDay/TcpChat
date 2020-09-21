@@ -13,14 +13,14 @@
 
 void logError(std::string_view source) noexcept {
     static std::mutex lMutex;
-    std::lock_guard lock{lMutex};
+    std::lock_guard{lMutex};
 
     std::cerr << "ERROR: <" << source << "> " << strerror(errno) << std::endl;
 }
 
 void logInfo(std::string_view info) noexcept {
     static std::mutex lMutex;
-    std::lock_guard lock{lMutex};
+    std::lock_guard{lMutex};
 
     std::cout << "INFO: " << info << std::endl;
 }
