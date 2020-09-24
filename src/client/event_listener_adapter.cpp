@@ -10,6 +10,7 @@ EventListenerAdapter::EventListenerAdapter(
 }
 
 EventListenerAdapter::~EventListenerAdapter() noexcept {
+    mListener.stop();
     mListener.join();
 }
 
