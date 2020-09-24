@@ -8,23 +8,38 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <cerrno>
 #include <cstring>
+
+#ifndef CHAT_LOG_ERROR
+#define CHAT_LOG_ERROR 0
+#endif
+
+#ifndef CHAT_LOG_INFO
+#define CHAT_LOG_INFO 0
+#endif
+
+#if CHAT_LOG_INFO | CHAT_LOG_ERROR
+#include <cerrno>
 #include <iostream>
 #include <mutex>
+#endif
 
-void logError(std::string_view source) noexcept {
+void logError([[maybe_unused]] std::string_view source) noexcept {
+#if CHAT_LOG_ERROR
     static std::mutex lMutex;
     std::lock_guard{lMutex};
 
     std::cerr << "ERROR: <" << source << "> " << strerror(errno) << std::endl;
+#endif
 }
 
-void logInfo(std::string_view info) noexcept {
+void logInfo([[maybe_unused]] std::string_view info) noexcept {
+#if CHAT_LOG_INFO
     static std::mutex lMutex;
     std::lock_guard{lMutex};
 
     std::cout << "INFO: " << info << std::endl;
+#endif
 }
 
 void makeNonBlocking(int fd) noexcept {
@@ -52,7 +67,8 @@ int bindedSocket(const ConnectionSetup & setup) noexcept {
     auto casted = reinterpret_cast<sockaddr *>(&address);
 
     int option = 1;
-    if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) < 0)
+    if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) <
+        0)
         logError("setsockopt");
 
     if (bind(socket, casted, sizeof(address)) < 0) {

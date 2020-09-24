@@ -1,5 +1,13 @@
 find_package(Threads)
 
+if(PRINT_ERRORS)
+    add_definitions(-DCHAT_LOG_ERROR=1)
+endif()
+
+if(PRINT_INFO)
+    add_definitions(-DCHAT_LOG_INFO=1)
+endif()
+
 add_library(
     chatlibs SHARED
     ${CMAKE_SOURCE_DIR}/src/incoming_events_listener.cpp
