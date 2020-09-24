@@ -3,10 +3,10 @@
 #include "connection_listener.h"
 #include "incoming_events_listener.h"
 #include "manual_control.h"
-#include "message.h"
 #include "workers_pool.h"
 
 #include <mutex>
+#include <vector>
 
 struct EndpointSetup;
 

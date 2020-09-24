@@ -4,13 +4,11 @@
 #include "client/message_widget.h"
 
 #include "io_operations.h"
-#include "setup.h"
 #include "ui_client.h"
 #include "utils.h"
 
 #include <unistd.h>
 
-#include <QDebug>
 #include <QTimer>
 
 Client::Client(
@@ -43,8 +41,6 @@ Client::~Client() noexcept {
 
 void Client::onIncomingMessage() noexcept {
     auto callback = [this](const Message & message) {
-        qDebug() << "Received " << message.text.size() << " bytes";
-
         auto item = new QListWidgetItem{ui->messagesListWidget};
         auto messageWidget = new MessageWidget{message, ui->messagesListWidget};
 

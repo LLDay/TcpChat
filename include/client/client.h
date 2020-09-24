@@ -37,7 +37,7 @@ private slots:
     void connectToServer() noexcept;
 
 private:
-    qint32 mSocket;
+    int mSocket;
     QString mName;
     ConnectionSetup mSetup;
 

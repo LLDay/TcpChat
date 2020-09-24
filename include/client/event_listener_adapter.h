@@ -4,14 +4,10 @@
 
 #include <QObject>
 
-class Client;
-
 class EventListenerAdapter : public QObject, public IncomingEventHandler {
     Q_OBJECT
 public:
-    EventListenerAdapter(
-        int eventBufferSize,
-        int timeout) noexcept;
+    explicit EventListenerAdapter(int eventBufferSize, int timeout) noexcept;
 
     ~EventListenerAdapter() noexcept;
 

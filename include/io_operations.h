@@ -3,9 +3,9 @@
 #include "message.h"
 #include "runnable.h"
 
-#include <vector>
 #include <functional>
 #include <memory>
+#include <vector>
 
 class IoReadTask : public IRunnable {
 public:

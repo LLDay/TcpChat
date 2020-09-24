@@ -1,7 +1,5 @@
 #include "client/event_listener_adapter.h"
 
-#include "client/client.h"
-
 EventListenerAdapter::EventListenerAdapter(
     int eventBufferSize,
     int timeout) noexcept

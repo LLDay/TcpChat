@@ -13,6 +13,7 @@ class MessageWidget : public QWidget {
 
 public:
     explicit MessageWidget(const Message & message, QWidget * parent = nullptr);
+
     ~MessageWidget();
 
 private:

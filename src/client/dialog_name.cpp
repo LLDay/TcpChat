@@ -5,7 +5,8 @@ DialogName::DialogName(QWidget * parent) noexcept
     : QDialog{parent}, ui{new Ui::DialogName} {
     ui->setupUi(this);
     connect(
-        ui->okButton, &QPushButton::clicked, this, &DialogName::onButtonClicked);
+        ui->okButton, &QPushButton::clicked, this,
+        &DialogName::onButtonClicked);
 }
 
 DialogName::~DialogName() noexcept {

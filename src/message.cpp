@@ -11,12 +11,11 @@ std::string Message::serialize() const noexcept {
         portableTime[i] = (datetime >> (8 * i)) & 0xFF;
 
     std::string serialized;
-    serialized.reserve(timeSize + author.size() + text.size() + 2);
+    serialized.reserve(timeSize + author.size() + text.size() + 1);
     serialized.append(portableTime, timeSize);
     serialized.append(author);
     serialized.append("\n");
     serialized.append(text);
-    serialized.append("\0");
 
     return serialized;
 }

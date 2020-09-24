@@ -6,8 +6,6 @@
 
 class LoopedThread : public ManualControl {
 public:
-    LoopedThread() noexcept = default;
-
     ~LoopedThread() noexcept;
 
     void join() noexcept;
