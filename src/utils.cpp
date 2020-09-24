@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include <cerrno>
 #include <cstring>
@@ -50,8 +51,15 @@ int bindedSocket(const ConnectionSetup & setup) noexcept {
     auto address = getSocketAddress(setup);
     auto casted = reinterpret_cast<sockaddr *>(&address);
 
-    if (bind(socket, casted, sizeof(address)) < 0)
+    int option = 1;
+    if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) < 0)
+        logError("setsockopt");
+
+    if (bind(socket, casted, sizeof(address)) < 0) {
         logError("bind");
+        close(socket);
+        return -1;
+    }
 
     return socket;
 }
@@ -61,8 +69,11 @@ int connectedSocket(const ConnectionSetup & setup) noexcept {
     auto address = getSocketAddress(setup);
     auto casted = reinterpret_cast<sockaddr *>(&address);
 
-    if (connect(socket, casted, sizeof(address)) < 0)
+    if (connect(socket, casted, sizeof(address)) < 0) {
         logError("connect");
+        close(socket);
+        return -1;
+    }
 
     return socket;
 }
