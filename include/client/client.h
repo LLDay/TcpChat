@@ -1,11 +1,11 @@
 #pragma once
 
 #include "event_listener_adapter.h"
+#include "setup.h"
 
 #include <QMainWindow>
 #include <QString>
 
-struct EndpointSetup;
 struct Message;
 
 namespace Ui {
@@ -14,6 +14,10 @@ class Client;
 
 class Client : public QMainWindow {
     Q_OBJECT
+
+private:
+    static constexpr int RECONNECT_TIME = 5000;
+
 public:
     explicit Client(
         QStringView name,
@@ -29,9 +33,14 @@ public slots:
 
     void onSendClicked() noexcept;
 
+private slots:
+    void connectToServer() noexcept;
+
 private:
     qint32 mSocket;
     QString mName;
+    ConnectionSetup mSetup;
+
     EventListenerAdapter mListener;
     Ui::Client * ui;
 };

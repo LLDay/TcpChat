@@ -11,12 +11,13 @@
 #include <unistd.h>
 
 #include <QDebug>
+#include <QTimer>
 
 Client::Client(
     QStringView name,
     const EndpointSetup & setup,
     QWidget * parent) noexcept
-    : QMainWindow{parent}, mName{name.toString()},
+    : QMainWindow{parent}, mName{name.toString()}, mSetup{setup.connection},
       mListener{setup.eventBufferSize, setup.timeout}, ui{new Ui::Client} {
     ui->setupUi(this);
 
@@ -32,29 +33,12 @@ Client::Client(
         &Client::onConnectionLost);
 
     ui->messageTextEdit->setFocus();
-
-    mSocket = connectedSocket(setup.connection);
-    makeNonBlocking(mSocket);
-
-    mListener.add(mSocket);
+    connectToServer();
 }
 
 Client::~Client() noexcept {
     delete ui;
-}
-
-void Client::onSendClicked() noexcept {
-    auto text = ui->messageTextEdit->toPlainText().toStdString();
-
-    if (text.empty())
-        return;
-
-    Message message;
-    message.author = mName.toStdString();
-    message.text = std::move(text);
-
-    IoWriteTask writeTask{mSocket, message};
-    writeTask.run();
+    ::close(mSocket);
 }
 
 void Client::onIncomingMessage() noexcept {
@@ -75,4 +59,35 @@ void Client::onIncomingMessage() noexcept {
     mListener.oneshot(mSocket);
 }
 
-void Client::onConnectionLost() noexcept {}
+void Client::onConnectionLost() noexcept {
+    ::close(mSocket);
+    connectToServer();
+}
+
+void Client::onSendClicked() noexcept {
+    auto text = ui->messageTextEdit->toPlainText().toStdString();
+
+    if (text.empty())
+        return;
+
+    Message message;
+    message.author = mName.toStdString();
+    message.text = std::move(text);
+
+    IoWriteTask writeTask{mSocket, message};
+    writeTask.run();
+}
+
+void Client::connectToServer() noexcept {
+    mSocket = connectedSocket(mSetup);
+
+    if (mSocket < 0) {
+        ui->statusLabel->show();
+        QTimer::singleShot(RECONNECT_TIME, this, &Client::connectToServer);
+        return;
+    }
+
+    ui->statusLabel->hide();
+    makeNonBlocking(mSocket);
+    mListener.add(mSocket);
+}

@@ -5,7 +5,11 @@
 
 #include <QApplication>
 
+#include <signal.h>
+
 int main(int argc, char * argv[]) {
+    signal(SIGPIPE, SIG_IGN);
+
     QApplication a{argc, argv};
     QString name;
     DialogName dialog;
