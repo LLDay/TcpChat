@@ -9,6 +9,7 @@
 
 #include <unistd.h>
 
+#include <QRegularExpression>
 #include <QTimer>
 
 Client::Client(
@@ -61,14 +62,20 @@ void Client::onConnectionLost() noexcept {
 }
 
 void Client::onSendClicked() noexcept {
-    auto text = ui->messageTextEdit->toPlainText().toStdString();
+    static QRegularExpression middle{"[\\n]{2,}"};
+    static QRegularExpression edge{"^\\n+|\\n+$"};
 
-    if (text.empty())
+    auto text = ui->messageTextEdit->toPlainText();
+
+    if (text.isEmpty())
         return;
+
+    text.replace(edge, "");
+    text.replace(middle, "\n\n");
 
     Message message;
     message.author = mName.toStdString();
-    message.text = std::move(text);
+    message.text = text.toStdString();
 
     IoWriteTask writeTask{mSocket, message};
     writeTask.run();
