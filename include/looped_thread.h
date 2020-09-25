@@ -8,7 +8,7 @@ class LoopedThread : public ManualControl {
 public:
     ~LoopedThread() noexcept;
 
-    void join() noexcept;
+    void join() noexcept final;
 
 protected:
     // The threadStep() method is called every time within loop() method.

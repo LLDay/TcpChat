@@ -10,6 +10,6 @@ void logInfo(std::string_view info) noexcept;
 
 void makeNonBlocking(int fd) noexcept;
 
-int bindedSocket(const ConnectionSetup & setup) noexcept;
+int listeningSocket(const ConnectionSetup & setup) noexcept;
 
 int connectedSocket(const ConnectionSetup & setup) noexcept;

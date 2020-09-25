@@ -2,6 +2,8 @@
 
 ManualControl::ManualControl() noexcept : mWorking{false} {}
 
+void ManualControl::join() noexcept {}
+
 void ManualControl::start() noexcept {
     if (!mWorking.exchange(true))
         onStart();

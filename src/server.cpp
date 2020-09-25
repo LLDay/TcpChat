@@ -1,6 +1,7 @@
 #include "server.h"
 
 #include "io_operations.h"
+#include "message.h"
 #include "setup.h"
 #include "utils.h"
 
@@ -12,8 +13,7 @@ Server::Server(const EndpointSetup & setup) noexcept
       mWorkers{setup.parallelWorkers} {}
 
 Server::~Server() noexcept {
-    stop();
-    join();
+    MANUAL_FINISH
 
     for (auto socket : mSockets)
         close(socket);

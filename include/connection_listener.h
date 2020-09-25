@@ -13,18 +13,14 @@ public:
 
 class ConnectionListener : public LoopedThread {
 public:
-    static constexpr size_t SERVER_PORT = 30852;
-    static constexpr size_t BACKLOG = 32;
-
-public:
     explicit ConnectionListener(
         IConnectionHandler & handler,
         const ConnectionSetup & setup) noexcept;
 
+    ~ConnectionListener() noexcept;
+
 private:
     void onStop() noexcept override;
-
-    void onThreadStart() noexcept override;
 
     void threadStep() noexcept override;
 

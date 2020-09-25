@@ -9,8 +9,6 @@ class EventListenerAdapter : public QObject, public IncomingEventHandler {
 public:
     explicit EventListenerAdapter(int eventBufferSize, int timeout) noexcept;
 
-    ~EventListenerAdapter() noexcept;
-
     void add(int socket) noexcept;
 
     void oneshot(int socket) noexcept;

@@ -8,7 +8,7 @@ class Worker : public LoopedThread {
 public:
     explicit Worker(WorkersPoolAccessor & pool) noexcept;
 
-    ~Worker() noexcept = default;
+    ~Worker() noexcept;
 
 private:
     void threadStep() noexcept override;

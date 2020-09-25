@@ -13,8 +13,7 @@ WorkersPool::WorkersPool(int size) {
 }
 
 WorkersPool::~WorkersPool() noexcept {
-    stop();
-    join();
+    MANUAL_FINISH
 }
 
 void WorkersPool::join() noexcept {

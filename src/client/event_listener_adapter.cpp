@@ -7,11 +7,6 @@ EventListenerAdapter::EventListenerAdapter(
     mListener.start();
 }
 
-EventListenerAdapter::~EventListenerAdapter() noexcept {
-    mListener.stop();
-    mListener.join();
-}
-
 void EventListenerAdapter::add(int socket) noexcept {
     mListener.add(socket);
 }

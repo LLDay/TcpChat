@@ -1,7 +1,7 @@
 #pragma once
 
 #include "manual_control.h"
-#include "runnable.h"
+#include "task.h"
 #include "worker.h"
 
 #include <condition_variable>
@@ -12,7 +12,7 @@
 
 class WorkersPoolAccessor {
 public:
-    using Task = std::unique_ptr<IRunnable>;
+    using Task = std::unique_ptr<ITask>;
     using TaskList = std::deque<Task>;
     using WorkersList = std::vector<std::unique_ptr<Worker>>;
 
@@ -28,7 +28,7 @@ public:
 
     ~WorkersPool() noexcept;
 
-    void join() noexcept;
+    void join() noexcept override;
 
     void addTask(Task && task) noexcept;
 

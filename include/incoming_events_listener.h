@@ -1,7 +1,6 @@
 #pragma once
 
 #include "looped_thread.h"
-#include "message.h"
 
 #include <sys/epoll.h>
 
@@ -23,6 +22,8 @@ public:
         IncomingEventHandler & handler,
         int eventBufferSize,
         int timeout);
+
+    ~IncomingEventsListener() noexcept;
 
     void add(int socket) noexcept;
 

@@ -1,7 +1,7 @@
 #include "connection_listener.h"
 #include "io_operations.h"
 #include "message.h"
-#include "runnable.h"
+#include "task.h"
 #include "utils.h"
 #include "workers_pool.h"
 
@@ -29,7 +29,7 @@ TEST(Server, Message) {
     ASSERT_EQ(message.datetime, deserialized.datetime);
 }
 
-class CounterTask : public IRunnable {
+class CounterTask : public ITask {
 public:
     void run() noexcept override {
         increment();

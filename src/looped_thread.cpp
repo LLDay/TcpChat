@@ -1,8 +1,7 @@
 #include "looped_thread.h"
 
 LoopedThread::~LoopedThread() noexcept {
-    stop();
-    join();
+    MANUAL_FINISH
 }
 
 void LoopedThread::join() noexcept {

@@ -9,6 +9,7 @@
 #include <vector>
 
 struct EndpointSetup;
+struct Message;
 
 class Server : public IConnectionHandler,
                public IncomingEventHandler,
@@ -21,7 +22,7 @@ public:
 
     ~Server() noexcept;
 
-    void join() noexcept;
+    void join() noexcept override;
 
 private:
     void onStart() noexcept override;

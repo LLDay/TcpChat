@@ -1,13 +1,13 @@
 #pragma once
 
 #include "message.h"
-#include "runnable.h"
+#include "task.h"
 
 #include <functional>
 #include <memory>
 #include <vector>
 
-class IoReadTask : public IRunnable {
+class IoReadTask : public ITask {
 public:
     static constexpr auto BUFFER_SIZE = 64;
 
@@ -26,7 +26,7 @@ private:
     CallbackType mCallback;
 };
 
-class IoWriteTask : public IRunnable {
+class IoWriteTask : public ITask {
 public:
     explicit IoWriteTask(int socket, const Message & message) noexcept;
 
@@ -37,7 +37,7 @@ private:
     Message mMessage;
 };
 
-class IoBroadcastTask : public IRunnable {
+class IoBroadcastTask : public ITask {
 public:
     using SocketList = std::vector<int>;
     using SharedMessage = std::shared_ptr<Message>;

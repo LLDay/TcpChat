@@ -9,19 +9,18 @@ ConnectionListener::ConnectionListener(
     IConnectionHandler & handler,
     const ConnectionSetup & setup) noexcept
     : mHandler{handler} {
-    mSocket = bindedSocket(setup);
+    mSocket = listeningSocket(setup);
+    if (mSocket < 0)
+        stop();
+}
+
+ConnectionListener::~ConnectionListener() noexcept {
+    MANUAL_FINISH
 }
 
 void ConnectionListener::onStop() noexcept {
     if (shutdown(mSocket, SHUT_RD))
         logError("shutdown");
-}
-
-void ConnectionListener::onThreadStart() noexcept {
-    if (listen(mSocket, BACKLOG) < 0) {
-        logError("listen");
-        stop();
-    }
 }
 
 void ConnectionListener::threadStep() noexcept {

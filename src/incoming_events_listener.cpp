@@ -1,6 +1,7 @@
 #include "incoming_events_listener.h"
 
 #include "utils.h"
+#include "message.h"
 
 #include <unistd.h>
 #include <stdexcept>
@@ -20,6 +21,10 @@ IncomingEventsListener::IncomingEventsListener(
         logError("epoll_create");
         stop();
     }
+}
+
+IncomingEventsListener::~IncomingEventsListener() noexcept {
+    MANUAL_FINISH
 }
 
 void IncomingEventsListener::add(int socket) noexcept {

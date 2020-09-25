@@ -61,7 +61,7 @@ sockaddr_in getSocketAddress(const ConnectionSetup & setup) {
     return address;
 }
 
-int bindedSocket(const ConnectionSetup & setup) noexcept {
+int listeningSocket(const ConnectionSetup & setup) noexcept {
     auto socket = ::socket(AF_INET, SOCK_STREAM, 0);
     auto address = getSocketAddress(setup);
     auto casted = reinterpret_cast<sockaddr *>(&address);
@@ -73,6 +73,12 @@ int bindedSocket(const ConnectionSetup & setup) noexcept {
 
     if (bind(socket, casted, sizeof(address)) < 0) {
         logError("bind");
+        close(socket);
+        return -1;
+    }
+
+    if (listen(socket, 32) < 0) {
+        logError("listen");
         close(socket);
         return -1;
     }
