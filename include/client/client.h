@@ -16,7 +16,7 @@ class Client : public QMainWindow {
     Q_OBJECT
 
 private:
-    static constexpr int RECONNECT_TIME = 5000;
+    static constexpr int RECONNECT_TIME = 1000;
 
 public:
     explicit Client(

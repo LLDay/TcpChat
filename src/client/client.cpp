@@ -6,10 +6,10 @@
 #include "io_operations.h"
 #include "utils.h"
 
-#include <unistd.h>
-
 #include <QRegularExpression>
 #include <QTimer>
+
+#include <unistd.h>
 
 Client::Client(
     QStringView name,
@@ -48,6 +48,7 @@ void Client::onIncomingMessage() noexcept {
         ui->messagesListWidget->addItem(item);
         ui->messagesListWidget->setItemWidget(item, messageWidget);
         ui->messageTextEdit->clear();
+        ui->messagesListWidget->scrollToBottom();
     };
 
     IoReadTask read{mSocket, callback};
