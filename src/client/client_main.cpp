@@ -1,7 +1,7 @@
 #include "client/client.h"
 
 #include "setup.h"
-#include "client/dialog_name.h"
+#include "client/name_dialog.h"
 
 #include <QApplication>
 

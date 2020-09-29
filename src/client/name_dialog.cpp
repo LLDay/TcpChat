@@ -1,5 +1,5 @@
-#include "client/dialog_name.h"
-#include "ui_dialog_name.h"
+#include "client/name_dialog.h"
+#include "ui_name_dialog.h"
 
 DialogName::DialogName(QWidget * parent) noexcept
     : QDialog{parent}, ui{new Ui::DialogName} {

@@ -1,10 +1,9 @@
 #include "client/client.h"
+#include "ui_client.h"
 
-#include "client/dialog_name.h"
 #include "client/message_widget.h"
 
 #include "io_operations.h"
-#include "ui_client.h"
 #include "utils.h"
 
 #include <unistd.h>
