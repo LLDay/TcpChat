@@ -1,11 +1,10 @@
 #include "client/client.h"
 #include "ui_client.h"
 
-#include "client/message_widget.h"
-
 #include "io_operations.h"
 #include "utils.h"
 
+#include <QDateTime>
 #include <QRegularExpression>
 #include <QTimer>
 
@@ -41,14 +40,14 @@ Client::~Client() noexcept {
 
 void Client::onIncomingMessage() noexcept {
     auto callback = [this](const Message & message) {
-        auto item = new QListWidgetItem{ui->messagesListWidget};
-        auto messageWidget = new MessageWidget{message, ui->messagesListWidget};
+        auto datetime = QDateTime::fromTime_t(message.datetime);
+        auto messageString = datetime.toString("<HH:mm> ");
+        messageString += "[" + QString::fromStdString(message.author) + "]\n";
+        messageString += QString::fromStdString(message.text);
 
-        item->setSizeHint(messageWidget->sizeHint());
-        ui->messagesListWidget->addItem(item);
-        ui->messagesListWidget->setItemWidget(item, messageWidget);
-        ui->messageTextEdit->clear();
+        ui->messagesListWidget->addItem(messageString);
         ui->messagesListWidget->scrollToBottom();
+        ui->messageTextEdit->clear();
     };
 
     IoReadTask read{mSocket, callback};
@@ -65,7 +64,7 @@ void Client::onSendClicked() noexcept {
     static QRegularExpression middle{"[\\n]{2,}"};
     static QRegularExpression edge{"^\\n+|\\n+$"};
 
-    auto text = ui->messageTextEdit->toPlainText();
+    auto text = ui->messageTextEdit->toPlainText().trimmed();
 
     if (text.isEmpty())
         return;
