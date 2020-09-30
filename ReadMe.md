@@ -16,20 +16,19 @@ Server and client programs will be placed in `../TcpClient/build/bin/`
 To close the server send SIGINT to it (using \<Ctrl-C\> or kill utility)
 
 # Server parts
-**ManualControl** interface provides methods for manually starting and stopping object's work, as well as checking its state.
+Server combines **ConnectionListener**, **IncomingEventsListener** and **WorkerPool**. It uses from 3 to (2 + \<Workers Number\>) threads.
+Optimal number of workers may equals `std::thread::hardware_concurency()`.
 
-**LoopedThread** runs a function in a loop within new thread.
+**ManualControl** interface provides methods for manually starting and stopping object's work, as well as checking its state. Many classes implement `onStart()` and `onStop()` event methods and `join()` method.
 
-**ConnectionListener** accepts client's connections.
+**LoopedThread** runs a function in a loop within new thread. Provides `onThreadStart()` and `onThreadFinish()` event methods and one pure virtual `threadStep()` method.
 
-**IncomingEventsListener** reacts on incoming messages and closed connections.
+**ConnectionListener** accepts client's connections. It calls `onNewConnection()` method of the server.
+
+**IncomingEventsListener** reacts on incoming messages and closed connections. It calls `onIncomingMessageFrom(int)` and `onConnectionLost(int)` methods of the server.
 
 **WorkersPool** runs several thread and wakes them up when a new task adds to the tasks queue.
 Server uses Tasks to parallel send and receive operations.
-
-
-Server combines **ConnectionListener**, **IncomingEventsListener** and **WorkerPool**. It uses from 3 to (2 + \<Workers Number\>) threads.
-Optimal number of workers may equals `std::thread::hardware_concurency()`.
 
 # Client parts
 
