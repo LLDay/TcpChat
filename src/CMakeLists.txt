@@ -9,7 +9,7 @@ if(PRINT_INFO)
 endif()
 
 add_library(
-    chatlibs SHARED
+    chatlibs STATIC
     ${CMAKE_SOURCE_DIR}/src/incoming_events_listener.cpp
     ${CMAKE_SOURCE_DIR}/src/io_operations.cpp
     ${CMAKE_SOURCE_DIR}/src/looped_thread.cpp
