@@ -13,7 +13,7 @@ void signalHandler(int signal) {
         server->stop();
 }
 
-int main() {
+int main(int argc, char * argv[]) {
     signal(SIGPIPE, SIG_IGN);
     signal(SIGINT, signalHandler);
 
@@ -21,8 +21,14 @@ int main() {
     setup.parallelWorkers = 4;
     setup.eventBufferSize = 20;
     setup.timeout = 1000;
-    setup.connection.port = 50000;
-    setup.connection.address = "127.0.0.1";
+
+    if (argc == 3) {
+        setup.connection.address = argv[1];
+        setup.connection.port = std::stoi(argv[2]);
+    } else {
+        setup.connection.address = "127.0.0.1";
+        setup.connection.port = 50000;
+    }
 
     server = std::make_unique<Server>(setup);
     server->start();

@@ -21,8 +21,7 @@ Server::~Server() noexcept {
 
 void Server::join() noexcept {
     mListener.join();
-    mIncomingEventsListener.join();
-    mWorkers.join();
+    stop();
 }
 
 void Server::onStart() noexcept {

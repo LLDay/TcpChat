@@ -1,8 +1,7 @@
 #pragma once
 
 #include "looped_thread.h"
-
-struct ConnectionSetup;
+#include "setup.h"
 
 class IConnectionHandler {
 public:
@@ -22,11 +21,14 @@ public:
 private:
     void onStop() noexcept override;
 
+    void onThreadStart() noexcept override;
+
     void threadStep() noexcept override;
 
     void onThreadFinish() noexcept override;
 
 private:
     IConnectionHandler & mHandler;
+    ConnectionSetup mSetup;
     int mSocket;
 };

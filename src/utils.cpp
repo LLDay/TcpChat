@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <optional>
 
 #ifndef CHAT_LOG_ERROR
 #define CHAT_LOG_ERROR 0
@@ -48,7 +49,7 @@ void makeNonBlocking(int fd) noexcept {
         logError("fcntl");
 }
 
-sockaddr_in getSocketAddress(const ConnectionSetup & setup) {
+std::optional<sockaddr_in> getSocketAddress(const ConnectionSetup & setup) {
     sockaddr_in address;
     memset(&address, 0, sizeof(address));
 
@@ -56,46 +57,60 @@ sockaddr_in getSocketAddress(const ConnectionSetup & setup) {
     address.sin_port = htons(setup.port);
 
     if (inet_pton(AF_INET, setup.address.c_str(), &address.sin_addr) <= 0)
-        logError("inet_pton");
+        return std::nullopt;
 
     return address;
 }
 
-int listeningSocket(const ConnectionSetup & setup) noexcept {
+ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept {
     auto socket = ::socket(AF_INET, SOCK_STREAM, 0);
     auto address = getSocketAddress(setup);
-    auto casted = reinterpret_cast<sockaddr *>(&address);
+    if (!address.has_value()) {
+        close(socket);
+        return ConnectionResponse{NET_ERROR::CRITICAL};
+    }
 
+    auto casted = reinterpret_cast<sockaddr *>(&address);
     int option = 1;
-    if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) <
-        0)
+    if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) < 0)
         logError("setsockopt");
 
     if (bind(socket, casted, sizeof(address)) < 0) {
         logError("bind");
         close(socket);
-        return -1;
+        return ConnectionResponse{NET_ERROR::CRITICAL};
     }
 
     if (listen(socket, 32) < 0) {
         logError("listen");
         close(socket);
-        return -1;
+        return ConnectionResponse{NET_ERROR::CRITICAL};
     }
 
-    return socket;
+    logInfo(
+        "Listening address: " + setup.address + ":" +
+        std::to_string(setup.port));
+
+    return ConnectionResponse{socket};
 }
 
-int connectedSocket(const ConnectionSetup & setup) noexcept {
+ConnectionResponse connectedSocket(const ConnectionSetup & setup) noexcept {
     auto socket = ::socket(AF_INET, SOCK_STREAM, 0);
     auto address = getSocketAddress(setup);
-    auto casted = reinterpret_cast<sockaddr *>(&address);
-
-    if (connect(socket, casted, sizeof(address)) < 0) {
-        logError("connect");
+    if (!address.has_value()) {
         close(socket);
-        return -1;
+        return ConnectionResponse{NET_ERROR::CRITICAL};
     }
 
-    return socket;
+    auto casted = reinterpret_cast<sockaddr *>(&address);
+    if (connect(socket, casted, sizeof(address)) < 0) {
+        logError("connect");
+        return ConnectionResponse{NET_ERROR::TEMPORARY};
+    }
+
+    logInfo(
+        "Connected to address: " + setup.address + ":" +
+        std::to_string(setup.port));
+
+    return ConnectionResponse{socket};
 }

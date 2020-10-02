@@ -1,7 +1,7 @@
 #include "client/client.h"
 
-#include "setup.h"
 #include "client/name_dialog.h"
+#include "setup.h"
 
 #include <QApplication>
 
@@ -23,8 +23,14 @@ int main(int argc, char * argv[]) {
         return 0;
 
     EndpointSetup setup;
-    setup.connection.address = "127.0.0.1";
-    setup.connection.port = 50000;
+    if (argc == 3) {
+        setup.connection.address = argv[1];
+        setup.connection.port = std::stoi(argv[2]);
+    } else {
+        setup.connection.address = "127.0.0.1";
+        setup.connection.port = 50000;
+    }
+
     setup.eventBufferSize = 2;
     setup.timeout = 100;
 

@@ -8,19 +8,21 @@
 ConnectionListener::ConnectionListener(
     IConnectionHandler & handler,
     const ConnectionSetup & setup) noexcept
-    : mHandler{handler} {
-    mSocket = listeningSocket(setup);
-    if (mSocket < 0)
-        stop();
-}
+    : mHandler{handler}, mSetup{setup} {}
 
 ConnectionListener::~ConnectionListener() noexcept {
     MANUAL_FINISH
 }
 
 void ConnectionListener::onStop() noexcept {
-    if (shutdown(mSocket, SHUT_RD))
+    if (mSocket >= 0 && shutdown(mSocket, SHUT_RD))
         logError("shutdown");
+}
+
+void ConnectionListener::onThreadStart() noexcept {
+    mSocket = listeningSocket(mSetup).socket;
+    if (mSocket < 0)
+        stop();
 }
 
 void ConnectionListener::threadStep() noexcept {
@@ -29,12 +31,12 @@ void ConnectionListener::threadStep() noexcept {
         return;
 
     if (socket < 0) {
-        logError("Accept");
+        logError("accept");
     }
     mHandler.onNewConnection(socket);
 }
 
 void ConnectionListener::onThreadFinish() noexcept {
-    if (close(mSocket) < 0)
-        logError("Close");
+    if (mSocket >= 0 && close(mSocket) < 0)
+        logError("close");
 }

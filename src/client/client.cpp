@@ -81,11 +81,21 @@ void Client::onSendClicked() noexcept {
 }
 
 void Client::connectToServer() noexcept {
-    mSocket = connectedSocket(mSetup);
+    auto connectionResult = connectedSocket(mSetup);
+    if (connectionResult.socket >= 0)
+        mSocket = connectionResult.socket;
 
-    if (mSocket < 0) {
+    if (connectionResult.error == NET_ERROR::TEMPORARY) {
+        ui->statusLabel->setText("No server connection");
         ui->statusLabel->show();
         QTimer::singleShot(RECONNECT_TIME, this, &Client::connectToServer);
+        return;
+    }
+
+    if (connectionResult.error == NET_ERROR::CRITICAL) {
+        close();
+        ui->statusLabel->setText("Wrong ip address or port");
+        ui->statusLabel->show();
         return;
     }
 

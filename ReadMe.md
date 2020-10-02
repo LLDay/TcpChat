@@ -14,6 +14,23 @@ Server and client programs will be placed in `../TcpClient/build/bin/`
 
 To close the server send SIGINT to it (using \<Ctrl-C\> or kill utility)
 
+# Arguments
+```bash
+server ip port
+client ip port
+```
+For example
+```bash
+server 127.0.0.1 2324 &
+client 127.0.0.1 2324 &
+client 127.0.0.1 2324 &
+```
+
+If an ip address or a port are not specified then the server/client will connect to the address `127.0.0.1/50000`.
+
+# Server parameters
+Some server parameters can be changed in `src/server_main.cpp` file. You might rather want to change the number of parallel workers.
+
 # Server parts
 Server combines **ConnectionListener**, **IncomingEventsListener** and **WorkerPool**. It uses from 3 to (2 + \<Workers Number\>) threads.
 Optimal number of workers may equals `std::thread::hardware_concurency()`.

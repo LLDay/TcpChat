@@ -30,6 +30,8 @@ public:
     void oneshot(int socket) noexcept;
 
 private:
+    void onThreadStart() noexcept override;
+
     void threadStep() noexcept override;
 
     void onThreadFinish() noexcept override;
