@@ -2,13 +2,12 @@
 Server receives messages from clients and broadcasts them back.
 
 # Build
-Requirements: Linux, Qt
+Requirements: docker, docker-compose >= 2.0
 
 ```bash
 git clone https://github.com/LLDay/TcpChat.git
 cd TcpChat
-mkdir build && cd build
-cmake .. && cmake --build . -j4
+docker-compose up
 ```
 
 Server and client programs will be placed in `../TcpClient/build/bin/`
