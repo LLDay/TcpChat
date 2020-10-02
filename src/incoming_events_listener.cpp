@@ -27,20 +27,21 @@ IncomingEventsListener::~IncomingEventsListener() noexcept {
     MANUAL_FINISH
 }
 
-void IncomingEventsListener::add(int socket) noexcept {
+epoll_event getEvent(int socket) noexcept {
     auto event = epoll_event{};
     event.data.fd = socket;
     event.events = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP | EPOLLERR;
+    return event;
+}
 
+void IncomingEventsListener::add(int socket) noexcept {
+    auto event = getEvent(socket);
     if (epoll_ctl(mEpoll, EPOLL_CTL_ADD, socket, &event) < 0)
         logError("epoll_ctl_add");
 }
 
 void IncomingEventsListener::oneshot(int socket) noexcept {
-    auto event = epoll_event{};
-    event.data.fd = socket;
-    event.events = EPOLLIN | EPOLLONESHOT | EPOLLRDHUP | EPOLLERR;
-
+    auto event = getEvent(socket);
     if (epoll_ctl(mEpoll, EPOLL_CTL_MOD, socket, &event) < 0)
         logError("epoll_ctl_mod");
 }
