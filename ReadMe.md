@@ -14,6 +14,20 @@ Server and client programs will be placed in `../TcpClient/build/bin/`
 
 To close the server send SIGINT to it (using \<Ctrl-C\> or kill utility)
 
+# Message format
+Server and client use this message format to communicate each other:
+```
+   server time       author        separator         text
+|--- 8 bytes ---|--- n bytes ---|--- 1 byte ---|--- m bytes ---|
+
+Total: 9 + length(author) + length(text) bytes
+```
+
+Server time field is aware of endianness.
+New line symbol `\n` is used as separator. It means that author cannot have this symbol in the name.
+You should use host with `sizeof(char)` == 1 (the most hosts meet this requirement).
+Converting a Message object fields to the communication format and back implemented in [message.cpp](src/message.cpp) file.
+
 # Arguments
 To specify globally ip address and port you should set both CHAT\_IP and CHAT\_PORT environment variables.
 Also you can set them explicitly passing as arguments. Arguments have higher priority than environment variables.
