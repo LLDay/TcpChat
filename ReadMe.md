@@ -15,18 +15,24 @@ Server and client programs will be placed in `../TcpClient/build/bin/`
 To close the server send SIGINT to it (using \<Ctrl-C\> or kill utility)
 
 # Arguments
-```bash
-server ip port
-client ip port
-```
+To specify globally ip address and port you should set both CHAT\_IP and CHAT\_PORT environment variables.
+Also you can set them explicitly passing as arguments. Arguments have higher priority than environment variables.
+If an ip address or a port are not specified then the server/client will connect to the address `127.0.0.1:50000`.
+
 For example
 ```bash
-server 127.0.0.1 2324 &
-client 127.0.0.1 2324 &
-client 127.0.0.1 2324 &
-```
+server # 127.0.0.1:50000
+client # 127.0.0.1:50000
 
-If an ip address or a port are not specified then the server/client will connect to the address `127.0.0.1/50000`.
+export CHAT_IP=12012
+export CHAT_PORT='10.152.40.31'
+
+server # 10.152.40.31:12012
+client # 10.152.40.31:12012
+
+server 10.203.11.10 2324 # 10.203.0.1:2324
+client 10.203.11.10 2324 # 10.203.0.1:2324
+```
 
 # Server parameters
 Some server parameters can be changed in `src/server_main.cpp` file. You might rather want to change the number of parallel workers.

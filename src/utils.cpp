@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/in.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -113,4 +114,22 @@ ConnectionResponse connectedSocket(const ConnectionSetup & setup) noexcept {
         std::to_string(setup.port));
 
     return ConnectionResponse{socket};
+}
+
+IpPort getIpPort(int argc, char * argv[]) noexcept {
+    auto envIp = getenv("CHAT_IP");
+    auto envPort = getenv("CHAT_PORT");
+    IpPort ipp;
+
+    if (argc == 3) {
+        ipp.ip = argv[1];
+        ipp.port = std::stoi(argv[2]);
+    } else if (envIp != nullptr && envPort != nullptr) {
+        ipp.ip = envIp;
+        ipp.port = std::stoi(envPort);
+    } else {
+        ipp.ip = "127.0.0.1";
+        ipp.port = 50000;
+    }
+    return ipp;
 }

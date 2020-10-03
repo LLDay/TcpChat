@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 
 struct ConnectionSetup;
 
@@ -16,6 +16,11 @@ struct ConnectionResponse {
     NET_ERROR error;
 };
 
+struct IpPort {
+    std::string ip;
+    int port;
+};
+
 void logError(std::string_view source) noexcept;
 
 void logInfo(std::string_view info) noexcept;
@@ -25,3 +30,5 @@ void makeNonBlocking(int fd) noexcept;
 ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept;
 
 ConnectionResponse connectedSocket(const ConnectionSetup & setup) noexcept;
+
+IpPort getIpPort(int argc, char * argv[]) noexcept;

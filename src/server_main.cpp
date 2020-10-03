@@ -1,6 +1,7 @@
 #include "server.h"
 
 #include "setup.h"
+#include "utils.h"
 
 #include <signal.h>
 
@@ -22,13 +23,9 @@ int main(int argc, char * argv[]) {
     setup.eventBufferSize = 20;
     setup.timeout = 1000;
 
-    if (argc == 3) {
-        setup.connection.address = argv[1];
-        setup.connection.port = std::stoi(argv[2]);
-    } else {
-        setup.connection.address = "127.0.0.1";
-        setup.connection.port = 50000;
-    }
+    auto ipp = getIpPort(argc, argv);
+    setup.connection.address = ipp.ip;
+    setup.connection.port = ipp.port;
 
     server = std::make_unique<Server>(setup);
     server->start();
