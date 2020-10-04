@@ -18,14 +18,13 @@ int main(int argc, char * argv[]) {
     signal(SIGPIPE, SIG_IGN);
     signal(SIGINT, signalHandler);
 
-    EndpointSetup setup;
-    setup.parallelWorkers = 4;
+    auto setupOptinal = getSetup(argc, argv);
+    if (!setupOptinal.has_value())
+        return EXIT_FAILURE;
+
+    auto setup = setupOptinal.value();
     setup.eventBufferSize = 20;
     setup.timeout = 1000;
-
-    auto ipp = getIpPort(argc, argv);
-    setup.connection.address = ipp.ip;
-    setup.connection.port = ipp.port;
 
     server = std::make_unique<Server>(setup);
     server->start();

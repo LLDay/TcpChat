@@ -1,5 +1,8 @@
 #pragma once
 
+#include "setup.h"
+
+#include <optional>
 #include <string>
 
 struct ConnectionSetup;
@@ -31,4 +34,4 @@ ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept;
 
 ConnectionResponse connectedSocket(const ConnectionSetup & setup) noexcept;
 
-IpPort getIpPort(int argc, char * argv[]) noexcept;
+std::optional<EndpointSetup> getSetup(int argc, char * argv[]) noexcept;

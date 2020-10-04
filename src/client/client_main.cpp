@@ -11,6 +11,14 @@
 int main(int argc, char * argv[]) {
     signal(SIGPIPE, SIG_IGN);
 
+    auto setupOptinal = getSetup(argc, argv);
+    if (!setupOptinal.has_value())
+        return -1;
+
+    auto setup = setupOptinal.value();
+    setup.eventBufferSize = 2;
+    setup.timeout = 100;
+
     QApplication a{argc, argv};
     QString name;
     DialogName dialog;
@@ -22,15 +30,6 @@ int main(int argc, char * argv[]) {
 
     if (name.isEmpty())
         return 0;
-
-    EndpointSetup setup;
-
-    auto ipp = getIpPort(argc, argv);
-    setup.connection.address = ipp.ip;
-    setup.connection.port = ipp.port;
-
-    setup.eventBufferSize = 2;
-    setup.timeout = 100;
 
     Client w{name, setup};
     w.show();
