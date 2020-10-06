@@ -63,8 +63,8 @@ std::optional<sockaddr_in> getSocketAddress(const ConnectionSetup & setup) {
     return address;
 }
 
-ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept {
-    auto socket = ::socket(AF_INET, SOCK_STREAM, 0);
+ConnectionResponse bindedSocket(const ConnectionSetup & setup) noexcept {
+    auto socket = ::socket(AF_INET, setup.type, 0);
     auto address = getSocketAddress(setup);
     if (!address.has_value()) {
         close(socket);
@@ -73,8 +73,7 @@ ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept {
 
     auto casted = reinterpret_cast<sockaddr *>(&address);
     int option = 1;
-    if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) <
-        0)
+    if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) < 0)
         logError("setsockopt");
 
     if (bind(socket, casted, sizeof(address)) < 0) {
@@ -83,9 +82,21 @@ ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept {
         return ConnectionResponse{NET_ERROR::CRITICAL};
     }
 
-    if (listen(socket, 32) < 0) {
+    logInfo(
+        "Binding address: " + setup.address + ":" +
+        std::to_string(setup.port));
+
+    return ConnectionResponse{socket};
+}
+
+ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept {
+    auto response = bindedSocket(setup);
+    if (response.error != NET_ERROR::NONE)
+        return response;
+
+    if (listen(response.socket, 32) < 0) {
         logError("listen");
-        close(socket);
+        close(response.socket);
         return ConnectionResponse{NET_ERROR::CRITICAL};
     }
 
@@ -93,11 +104,11 @@ ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept {
         "Listening address: " + setup.address + ":" +
         std::to_string(setup.port));
 
-    return ConnectionResponse{socket};
+    return response;
 }
 
 ConnectionResponse connectedSocket(const ConnectionSetup & setup) noexcept {
-    auto socket = ::socket(AF_INET, SOCK_STREAM, 0);
+    auto socket = ::socket(AF_INET, setup.type, 0);
     auto address = getSocketAddress(setup);
     if (!address.has_value()) {
         close(socket);
@@ -117,10 +128,11 @@ ConnectionResponse connectedSocket(const ConnectionSetup & setup) noexcept {
     return ConnectionResponse{socket};
 }
 
-std::optional<EndpointSetup> getSetup(int argc, char * argv[]) noexcept {
+std::optional<EndpointSetup> getSetup(int argc, char * argv[], std::string_view ip, int port) noexcept {
     EndpointSetup setup;
-    setup.connection.address = "127.0.0.1";
-    setup.connection.port = 50000;
+    setup.connection.address = ip;
+    setup.connection.port = port;
+    setup.connection.type = SOCK_STREAM;
     setup.timeout = 1000;
     setup.eventBufferSize = 32;
     setup.parallelWorkers = 4;

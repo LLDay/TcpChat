@@ -21,6 +21,8 @@ add_library(
 
 target_link_libraries(chatlibs PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
+target_include_directories(chatlibs PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
 add_executable(server
     ${PROJECT_SOURCE_DIR}/src/connection_listener.cpp
     ${PROJECT_SOURCE_DIR}/src/server.cpp

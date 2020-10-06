@@ -14,7 +14,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 option(PRINT_ERRORS "Output errors to errors stream" ON)
 option(PRINT_INFO "Output info to output stream" ON)
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/client)

@@ -18,11 +18,11 @@ int main(int argc, char * argv[]) {
     signal(SIGPIPE, SIG_IGN);
     signal(SIGINT, signalHandler);
 
-    auto setupOptinal = getSetup(argc, argv);
-    if (!setupOptinal.has_value())
+    auto setupOptional = getSetup(argc, argv, "127.0.0.1", 50000);
+    if (!setupOptional.has_value())
         return EXIT_FAILURE;
 
-    auto setup = setupOptinal.value();
+    auto setup = setupOptional.value();
     setup.eventBufferSize = 20;
     setup.timeout = 1000;
 

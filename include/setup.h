@@ -6,6 +6,7 @@
 struct ConnectionSetup {
     in_port_t port;
     std::string address;
+    int type;
 };
 
 struct EndpointSetup {

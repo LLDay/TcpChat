@@ -57,6 +57,7 @@ void Client::onIncomingMessage() noexcept {
 
 void Client::onConnectionLost() noexcept {
     ::close(mSocket);
+    logInfo("Disconnected from server");
     connectToServer();
 }
 

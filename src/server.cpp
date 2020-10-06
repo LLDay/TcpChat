@@ -17,6 +17,8 @@ Server::~Server() noexcept {
 
     for (auto socket : mSockets)
         close(socket);
+
+    logInfo("Server stopped");
 }
 
 void Server::join() noexcept {

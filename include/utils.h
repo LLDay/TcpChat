@@ -19,19 +19,17 @@ struct ConnectionResponse {
     NET_ERROR error;
 };
 
-struct IpPort {
-    std::string ip;
-    int port;
-};
-
 void logError(std::string_view source) noexcept;
 
 void logInfo(std::string_view info) noexcept;
 
 void makeNonBlocking(int fd) noexcept;
 
+ConnectionResponse bindedSocket(const ConnectionSetup & setup) noexcept;
+
 ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept;
 
 ConnectionResponse connectedSocket(const ConnectionSetup & setup) noexcept;
 
-std::optional<EndpointSetup> getSetup(int argc, char * argv[]) noexcept;
+std::optional<EndpointSetup>
+getSetup(int argc, char * argv[], std::string_view ip, int port) noexcept;
