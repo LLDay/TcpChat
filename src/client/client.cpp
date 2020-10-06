@@ -1,6 +1,8 @@
 #include "client/client.h"
 #include "ui_client.h"
 
+#include "client/message_widget.h"
+
 #include "io_operations.h"
 #include "utils.h"
 
@@ -40,12 +42,11 @@ Client::~Client() noexcept {
 
 void Client::onIncomingMessage() noexcept {
     auto callback = [this](const Message & message) {
-        auto datetime = QDateTime::fromTime_t(message.datetime);
-        auto messageString = datetime.toString("<HH:mm> ");
-        messageString += "[" + QString::fromStdString(message.author) + "]\n";
-        messageString += QString::fromStdString(message.text);
-
-        ui->messagesListWidget->addItem(messageString);
+        auto widget = new MessageWidget{message, ui->messagesListWidget};
+        auto item = new QListWidgetItem{ui->messagesListWidget};
+        item->setSizeHint(widget->sizeHint());
+        ui->messagesListWidget->addItem(item);
+        ui->messagesListWidget->setItemWidget(item, widget);
         ui->messagesListWidget->scrollToBottom();
         ui->messageTextEdit->clear();
     };
