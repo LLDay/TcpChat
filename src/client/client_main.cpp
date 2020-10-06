@@ -11,13 +11,12 @@
 int main(int argc, char * argv[]) {
     signal(SIGPIPE, SIG_IGN);
 
-    auto setupOptional = getSetup(argc, argv, "127.0.0.1", 50000);
-    if (!setupOptional.has_value())
+    auto setup = getSetup(argc, argv, "127.0.0.1", 50000);
+    if (!setup.has_value())
         return -1;
 
-    auto setup = setupOptional.value();
-    setup.eventBufferSize = 2;
-    setup.timeout = 100;
+    setup->eventBufferSize = 2;
+    setup->timeout = 100;
 
     QApplication a{argc, argv};
     QString name;
@@ -31,7 +30,7 @@ int main(int argc, char * argv[]) {
     if (name.isEmpty())
         return 0;
 
-    Client w{name, setup};
+    Client w{name, *setup};
     w.show();
     return a.exec();
 }

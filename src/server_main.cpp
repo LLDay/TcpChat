@@ -16,17 +16,16 @@ void signalHandler(int signal) {
 
 int main(int argc, char * argv[]) {
     signal(SIGPIPE, SIG_IGN);
-    signal(SIGINT, signalHandler);
 
-    auto setupOptional = getSetup(argc, argv, "127.0.0.1", 50000);
-    if (!setupOptional.has_value())
+    auto setup = getSetup(argc, argv, "127.0.0.1", 50000);
+    if (!setup.has_value())
         return EXIT_FAILURE;
 
-    auto setup = setupOptional.value();
-    setup.eventBufferSize = 20;
-    setup.timeout = 1000;
+    setup->eventBufferSize = 20;
+    setup->timeout = 1000;
 
-    server = std::make_unique<Server>(setup);
+    server = std::make_unique<Server>(*setup);
+    signal(SIGINT, signalHandler);
     server->start();
     server->join();
 
