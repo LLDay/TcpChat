@@ -102,6 +102,5 @@ void Client::connectToServer() noexcept {
     }
 
     ui->statusLabel->hide();
-    makeNonBlocking(mSocket);
     mListener.add(mSocket);
 }

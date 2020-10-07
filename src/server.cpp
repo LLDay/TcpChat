@@ -40,7 +40,7 @@ void Server::onStop() noexcept {
 
 void Server::onNewConnection(int socket) noexcept {
     std::lock_guard lock{mMutex};
-    makeNonBlocking(socket);
+    //makeNonBlocking(socket);
     mSockets.push_back(socket);
 
     mIncomingEventsListener.add(socket);

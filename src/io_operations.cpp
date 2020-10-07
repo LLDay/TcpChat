@@ -13,21 +13,20 @@ IoReadTask::IoReadTask(int socket, CallbackType callback) noexcept
 void IoReadTask::run() noexcept {
     std::array<char, BUFFER_SIZE> buffer;
     std::vector<char> rawMessage;
-
-    auto bytes = read(mSocket, buffer.begin(), buffer.size());
-
-    if (bytes < 0) {
-        logError("read");
-        return;
-    }
+    int bytes;
 
     do {
+        bytes = read(mSocket, buffer.begin(), buffer.size());
+
+        if (bytes < 0) {
+            logError("read");
+            return;
+        }
+
         std::copy(
             buffer.begin(), buffer.begin() + bytes,
             std::back_inserter(rawMessage));
-
-        bytes = read(mSocket, buffer.begin(), buffer.size());
-    } while (bytes > 0);
+    } while (buffer[bytes - 1] != '\0');
 
     logInfo("Received " + std::to_string(rawMessage.size()) + " bytes");
 

@@ -17,14 +17,16 @@ To close the server send SIGINT to it (using \<Ctrl-C\> or kill utility)
 # Message format
 Server and client use this message format to communicate each other:
 ```
-   server time       author        separator         text
-|--- 8 bytes ---|--- n bytes ---|--- 1 byte ---|--- m bytes ---|
+   server time       author        separator         text          end byte
+|--- 8 bytes ---|--- n bytes ---|--- 1 byte ---|--- m bytes ---|--- 1 byte ---|
 
-Total: 9 + length(author) + length(text) bytes
+Total: 10 + length(author) + length(text) bytes
 ```
 
 Server time field is aware of endianness.
-New line symbol `\n` is used as separator. It means that author cannot have this symbol in the name.
+New line symbol `'\n'` is used as separator. It means that author cannot have this symbol in the name.
+`'\0'` is used as end of message flag. It prevents reading incomplete messages when they are transferring slowly.
+
 You should use host with `sizeof(char)` == 1 (the most hosts meet this requirement).
 Converting a Message object fields to the communication format and back implemented in [message.cpp](src/message.cpp) file.
 

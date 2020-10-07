@@ -16,6 +16,7 @@ std::string Message::serialize() const noexcept {
     serialized.append(author);
     serialized.append("\n");
     serialized.append(text);
+    serialized.append("\0", 1);
 
     return serialized;
 }
@@ -25,7 +26,7 @@ Message Message::deserialize(const char * data, size_t size) noexcept {
 
     Message deserialized;
 
-    auto dataEnd = data + size;
+    auto dataEnd = data + size - 1;
     auto authorStart = data + timeSize;
     auto authorEnd = std::find(authorStart, dataEnd, '\n');
 
