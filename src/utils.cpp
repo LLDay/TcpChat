@@ -100,10 +100,6 @@ ConnectionResponse listeningSocket(const ConnectionSetup & setup) noexcept {
         return ConnectionResponse{NET_ERROR::CRITICAL};
     }
 
-    logInfo(
-        "Listening address: " + setup.address + ":" +
-        std::to_string(setup.port));
-
     return response;
 }
 
