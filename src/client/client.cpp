@@ -16,7 +16,8 @@ Client::Client(
     QStringView name,
     const EndpointSetup & setup,
     QWidget * parent) noexcept
-    : QMainWindow{parent}, mName{name.toString()}, mSetup{setup.connection},
+    : QMainWindow{parent},
+      mSendClicked{false}, mName{name.toString()}, mSetup{setup.connection},
       mListener{setup.eventBufferSize, setup.timeout}, ui{new Ui::Client} {
     ui->setupUi(this);
 
@@ -48,7 +49,8 @@ void Client::onIncomingMessage() noexcept {
         ui->messagesListWidget->addItem(item);
         ui->messagesListWidget->setItemWidget(item, widget);
         ui->messagesListWidget->scrollToBottom();
-        ui->messageTextEdit->clear();
+        if (mSendClicked.exchange(false))
+            ui->messageTextEdit->clear();
     };
 
     IoReadTask read{mSocket, callback};
@@ -80,6 +82,7 @@ void Client::onSendClicked() noexcept {
 
     IoWriteTask writeTask{mSocket, message};
     writeTask.run();
+    mSendClicked.store(true);
 }
 
 void Client::connectToServer() noexcept {

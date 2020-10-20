@@ -6,6 +6,8 @@
 #include <QMainWindow>
 #include <QString>
 
+#include <atomic>
+
 struct Message;
 
 namespace Ui {
@@ -38,6 +40,7 @@ private slots:
 
 private:
     int mSocket;
+    std::atomic_bool mSendClicked;
     QString mName;
     ConnectionSetup mSetup;
 
